@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Todo Dashboard - Next.js (App Router)
 
-## Getting Started
+A responsive and fully functional Todo Dashboard built with Next.js (App Router), TypeScript, TanStack Query (v5), and Tailwind CSS. It fetches todos from the `jsonplaceholder` API, supports pagination, and provides immediate UI updates for toggling and adding todos.
 
-First, run the development server:
+## Features
 
+- **Responsive Design:** Clean, minimal, card-style dashboard UI built with Tailwind CSS. The layout seamlessly adapts from mobile screens (with a hidden sidebar and adjusted padding) to large desktop displays.
+- **Fetch Todos:** Loads todos from the API with pagination.
+- **Pagination:** Navigate between pages of todos seamlessly with cached data for quick navigation.
+- **Toggle Completed Status:** Uses TanStack Query optimistic updates to reflect task completion instantly.
+- **Add Local Todo:** The "Add Task" button is fully functional, instantly focusing the quick-add input to seamlessly add new tasks to the current page instantly without requiring backend persistence.
+- **Loading & Error States:** Clear visual feedback during data fetching.
+
+## Tech Stack
+
+- **Framework:** Next.js (App Router)
+- **Language:** TypeScript
+- **State Management/Data Fetching:** TanStack Query (React Query v5)
+- **Styling:** Tailwind CSS
+- **Icons:** Lucide React
+
+## Setup Guide
+
+Follow these instructions to get the project running on your local machine.
+
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org/) installed on your machine (v18+ recommended).
+
+### 1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd round-tech-square
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Run the development server
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Open your browser
+Navigate to [http://localhost:3000](http://localhost:3000) to view the application in action.
 
-## Learn More
+## Architecture & Implementation Notes
 
-To learn more about Next.js, take a look at the following resources:
+### Component Structure
+- `app/layout.tsx`: Wraps the application in the `QueryProvider` context and renders the responsive main layout with the `Sidebar`.
+- `app/page.tsx`: The main entry point that manages the `page` state and renders the `TodoList`.
+- `components/Sidebar.tsx`: Navigation sidebar that is fully responsive (hidden on mobile, visible on desktop).
+- `components/TodoList.tsx`: Handles data fetching using `useQuery` and renders the list of todos, along with responsive headers and interactive "Add Task" buttons.
+- `components/TodoItem.tsx`: Renders individual todos and handles optimistic updates for the `completed` status toggle.
+- `components/AddTodo.tsx`: Input form for adding new local todos, updating the cache directly.
+- `components/Pagination.tsx`: Navigation controls (Previous/Next) integrated with the `page` state.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Pagination Logic
+Pagination is controlled by a `page` state defined in the home page component (`app/page.tsx`). This state is passed down to `TodoList` and used in the `useQuery` hook to fetch data dynamically (`fetchTodos(page)`). As the page changes, React Query fetches the new data while utilizing `placeholderData: (previousData) => previousData` to prevent a hard loading state, keeping the UI smooth during transitions.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Optimistic Update Logic
+For adding new todos and toggling completion status, the app bypasses waiting for a slow (or non-existent) mutation API call and instead updates the local cache directly using `queryClient.setQueryData`. 
+- **Toggling:** Maps through the cached array and flips the `completed` boolean of the matched todo.
+- **Adding:** Unshifts a new todo object (with a temporary `id` generated by `Date.now()`) to the beginning of the cached array. This provides an instant "snappy" feeling for the user.
