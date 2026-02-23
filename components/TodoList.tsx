@@ -93,7 +93,7 @@ export default function TodoList({ page, setPage }: { page: number, setPage: (pa
                     page={page}
                     setPage={setPage}
                     isPlaceholderData={isPlaceholderData}
-                    hasMore={data ? data.length === 10 : true}
+                    hasMore={data ? data.length >= 10 : true}
                 />
             </div>
         </div>
